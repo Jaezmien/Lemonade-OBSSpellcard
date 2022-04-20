@@ -1,0 +1,67 @@
+<Layer
+	Type="Quad"
+	Name="OBS Spellcards"
+	OverlayReadyMessageCommand="queuecommand,First"
+	FirstCommand="%function(self)
+		if OBS_SPELLCARDS then return end
+
+		OBS_SPELLCARDS = {}
+		OBS_SPELLCARDS.screen = nil
+		OBS_SPELLCARDS.active = false
+
+		OBS_SPELLCARDS.spellcards = {}
+		OBS_SPELLCARDS.last_spellcard = -1
+
+		self:luaeffect('Start')
+	end"
+	StartCommand="%function(self)
+		local screen = SCREENMAN:GetTopScreen():GetName()
+
+		if OBS_SPELLCARDS.screen ~= screen then
+			OBS_SPELLCARDS.active = screen == 'ScreenGameplay'
+
+			if OBS_SPELLCARDS.screen == 'ScreenGameplay' and screen ~= 'ScreenGameplay' then
+				Lemonade.Buffers:Add(8, { 0 })
+			end
+
+			OBS_SPELLCARDS.spellcards = {}
+			OBS_SPELLCARDS.last_spellcard = -1
+			if OBS_SPELLCARDS.active then
+				local song = GAMESTATE:GetCurrentSong()
+				OBS_SPELLCARDS.spellcards = song:GetSpellCards()
+
+				Lemonade.Buffers:Add(8, { 0 })
+			end
+
+			OBS_SPELLCARDS.screen = screen
+		end
+
+		if OBS_SPELLCARDS.active then
+			local beat = GAMESTATE:GetSongBeat()
+
+			local spellcard = nil
+			local spellcard_index = -1
+			for i,spell in ipairs( OBS_SPELLCARDS.spellcards ) do
+				if beat >= spell.StartBeat and beat <= spell.EndBeat then
+					spellcard = spell
+					spellcard_index = i
+					break
+				end
+			end
+
+			if OBS_SPELLCARDS.last_spellcard ~= spellcard_index then
+				if spellcard_index == -1 then
+					-- No spellcard?
+					Lemonade.Buffers:Add(8, { 0 })
+				else
+					-- Spell card (new)
+					local val = { 1 }
+					for _,v in ipairs( Lemonade:Encode(spellcard.Name) ) do table.insert( val, v ) end
+					Lemonade.Buffers:Add(8, val)
+				end
+
+				OBS_SPELLCARDS.last_spellcard = spellcard_index
+			end
+		end
+	end"
+/>
