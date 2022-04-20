@@ -241,7 +241,7 @@ class _NotITGLinuxHandler( _NotITGHandler ):
 						if errno.errorcode[ ct.get_errno() ] == "EPERM": raise NotITGError("Cannot access process! Try running the script again with sudo privileges.")
 						else: continue
 					BUFFER = ct.create_string_buffer(8)
-					LOCAL, REMOTE = self._create_iovecs( BUFFER, self.get_version_details()['BuildAddress'] )
+					LOCAL, REMOTE = self._create_iovecs( BUFFER, _NOTITG_VERSIONS[ver]['BuildAddress'] )
 					self.vm_read( proc.pid, LOCAL, 1, REMOTE, 1, 0 )
 					try:
 						if BUFFER.value.decode() == str(addresses['BuildDate']):
@@ -271,7 +271,7 @@ class _NotITGLinuxHandler( _NotITGHandler ):
 						if errno.errorcode[ ct.get_errno() ] == "EPERM": raise NotITGError("Cannot access process! Try running the script again with sudo privileges.")
 						else: continue
 					BUFFER = ct.create_string_buffer(8)
-					LOCAL, REMOTE = self._create_iovecs( BUFFER, self.get_version_details()['BuildAddress'] )
+					LOCAL, REMOTE = self._create_iovecs( BUFFER, _NOTITG_VERSIONS[ver]['BuildAddress'] )
 					self.vm_read( proc.pid, LOCAL, 1, REMOTE, 1, 0 )
 					try:
 						if BUFFER.value.decode() == str(addresses['BuildDate']):
